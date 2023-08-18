@@ -1,8 +1,33 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaBridge", "KafkaBridge\KafkaBridge.csproj", "{9CA275E9-0A1C-4FFF-BB94-EBBFEBBB1E13}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureServiceBusBridge", "AzureServiceBusBridge\AzureServiceBusBridge.csproj", "{11C0C583-34F0-41B4-9C29-1A4B31CF3433}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{41C1ED01-536E-4F7A-A78A-BF65EE5C2FD9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaProducer", "KafkaProducer\KafkaProducer.csproj", "{1221C3C6-78A6-4416-ABCE-DA3FB6F6E348}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9CA275E9-0A1C-4FFF-BB94-EBBFEBBB1E13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CA275E9-0A1C-4FFF-BB94-EBBFEBBB1E13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CA275E9-0A1C-4FFF-BB94-EBBFEBBB1E13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CA275E9-0A1C-4FFF-BB94-EBBFEBBB1E13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11C0C583-34F0-41B4-9C29-1A4B31CF3433}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11C0C583-34F0-41B4-9C29-1A4B31CF3433}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11C0C583-34F0-41B4-9C29-1A4B31CF3433}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11C0C583-34F0-41B4-9C29-1A4B31CF3433}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1221C3C6-78A6-4416-ABCE-DA3FB6F6E348}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1221C3C6-78A6-4416-ABCE-DA3FB6F6E348}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1221C3C6-78A6-4416-ABCE-DA3FB6F6E348}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1221C3C6-78A6-4416-ABCE-DA3FB6F6E348}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1221C3C6-78A6-4416-ABCE-DA3FB6F6E348} = {41C1ED01-536E-4F7A-A78A-BF65EE5C2FD9}
 	EndGlobalSection
 EndGlobal
