@@ -1,4 +1,7 @@
-﻿using Confluent.Kafka;
+﻿using System.Text.Json.Serialization;
+using Confluent.Kafka;
+using EventModels;
+using Newtonsoft.Json;
 
 var config = new ProducerConfig {
     BootstrapServers = "localhost:29092",
@@ -12,7 +15,12 @@ using (var p = new ProducerBuilder<Null, string>(config).Build())
         for(var i = 0; i < 100; i++)
             try
             {
-                var dr = await p.ProduceAsync("topic1", new Message<Null, string> { Value=$"TEST MESSAGE {i}" });
+                var xxx = new AccountCreatedEvent
+                {
+                    UserId = Guid.NewGuid().ToString()
+                };
+                var toSend = JsonConvert.SerializeObject(xxx);
+                var dr = await p.ProduceAsync("topic1", new Message<Null, string> { Value=toSend });
                 Console.WriteLine($"Delivered '{dr.Value}' to '{dr.TopicPartitionOffset}'");
             }
             catch (ProduceException<Null, string> e)
