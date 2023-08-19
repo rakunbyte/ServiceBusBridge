@@ -1,16 +1,16 @@
-using System.Text.Json.Nodes;
+using BackingServices.Common;
 using EventModels;
-using Newtonsoft.Json;
+using Serilog;
 
 namespace BackingServices;
 
-public class AccountCreatedService : IBackingService
+public class AccountCreatedService : BaseBackingService<AccountCreatedEvent>
 {
-    
-    public Task DoWork(string message)
+    public override string Name => "AccountCreated";
+
+    public override Task HandleEvent(AccountCreatedEvent workingEvent)
     {
-        var xxx = JsonConvert.DeserializeObject<AccountCreatedEvent>(message);
-        Console.WriteLine("Hey I got an event " + xxx.UserId );
+        Log.Information("Account Created Processing Event: {@Event}", workingEvent);
         return Task.CompletedTask;
     }
 }
