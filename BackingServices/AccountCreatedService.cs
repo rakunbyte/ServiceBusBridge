@@ -11,6 +11,9 @@ public class AccountCreatedService : BaseBackingService<AccountCreatedEvent>
     public override Task HandleEvent(AccountCreatedEvent workingEvent)
     {
         Log.Information("Account Created Processing Event: {@Event}", workingEvent);
+        //This is where you make your api calls, etc
+        
+        //send CCS V2 request
         return Task.CompletedTask;
     }
 }

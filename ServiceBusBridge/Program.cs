@@ -1,10 +1,14 @@
 ﻿using BackingServices.Common;
 using Destructurama;
+using KafkaBridge;
 using KafkaBridge.Configuration;
 using KafkaBridge.Consumers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+
+
+//TODO use host pattern so we can return health checks instead
 
 Console.WriteLine("Starting Service Bus Consumer Host!");
 
@@ -30,26 +34,13 @@ serviceCollection.AddLogging(builder =>
     builder.AddSerilog(Log.Logger, true);
 });
 serviceCollection.AddBackingServices();
+serviceCollection.AddScoped<MainService>();
+
+var kafkaConsumerServiceConfigs = configuration.GetSection("KafkaConsumerConfigs").Get<List<KafkaConsumerServiceConfig>>()?? new List<KafkaConsumerServiceConfig>();;
+var azureServiceBusConsumerServiceConfigs = configuration.GetSection("AzureServiceBusConsumerConfigs").Get<List<AzureServiceBusConsumerServiceConfig>>() ?? new List<AzureServiceBusConsumerServiceConfig>();
 
 var serviceProvider = serviceCollection.BuildServiceProvider();
-var backingServices = serviceProvider.GetServices<IBackingService>().ToList();
+var mainService = serviceProvider.GetService<MainService>();
 
-//For each Kafka Config, Create a Kafka Consumer
-//For each ASB config, create an ASB Consumer
-var kafkaConfigs = configuration.GetSection("KafkaConsumerConfigs").Get<List<KafkaConsumerConfig>>();
-if (kafkaConfigs == null) throw new Exception("Balls");
-
-var kafkaConsumerTasks = new List<Task>();
-foreach (var config in kafkaConfigs)
-{
-    var backingService = backingServices.First(x => x.Name == config.BackingServiceName);
-    var kafkaConsumer = new KafkaConsumer(config, backingService);
-    kafkaConsumerTasks.Add(kafkaConsumer.Consume());
-}
-
+await mainService.Start(kafkaConsumerServiceConfigs, azureServiceBusConsumerServiceConfigs);
 Console.ReadKey();
-
-foreach (var task in kafkaConsumerTasks)
-{
-    task.Dispose();
-}
