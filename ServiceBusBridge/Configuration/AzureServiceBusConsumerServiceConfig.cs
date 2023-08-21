@@ -9,4 +9,7 @@ public class AzureServiceBusConsumerServiceConfigs
 public class AzureServiceBusConsumerServiceConfig : IConsumerServiceConfig
 {
     public string? BackingServiceName { get; set; }
+    public string? ConnectionString { get; set; }
+    public string? Topic { get; set; }
+    public string? Subscription { get; set; }
 }

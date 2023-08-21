@@ -12,28 +12,28 @@ public interface IKafkaConsumerService : IConsumerService
 
 public class KafkaConsumerService : IKafkaConsumerService
 {
-    private readonly KafkaConsumerServiceConfig _kafkaConsumerServiceConfig;
+    private readonly KafkaConsumerServiceConfig Config;
     private readonly IBackingService BackingService;
     
-    public KafkaConsumerService(KafkaConsumerServiceConfig kafkaConsumerServiceConfig, IBackingService backingService)
+    public KafkaConsumerService(KafkaConsumerServiceConfig config, IBackingService backingService)
     {
-        _kafkaConsumerServiceConfig = kafkaConsumerServiceConfig;
+        Config = config;
         BackingService = backingService;
     }
     
     public async Task StartConsumer(CancellationToken cancellationToken)
     {
-        Log.Information("Starting KafkaConsumerService for {@KafkaConsumerServiceConfig}", _kafkaConsumerServiceConfig);
-        var consumerConfig = _kafkaConsumerServiceConfig.CreateConsumerConfig();
+        Log.Information("Starting {Service} for {@KafkaConsumerServiceConfig}", nameof(KafkaConsumerService), Config);
+        var consumerConfig = Config.CreateConsumerConfig();
         using var consumer = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
         
-        consumer.Subscribe(_kafkaConsumerServiceConfig.Topic);
+        consumer.Subscribe(Config.Topic);
         try
         {
             while (true)
             {
                 var consumeResult = consumer.Consume(cancellationToken);
-                Log.Information("Message received, sending to backing service");
+                Log.Information("Kafka Message received, sending to backing service. Message: {@Message}", consumeResult.Message.Value);
                 await BackingService.ProcessMessage(consumeResult.Message.Value);
             }
         }
@@ -44,6 +44,7 @@ public class KafkaConsumerService : IKafkaConsumerService
             Log.Warning("Kafka Client is shutting down!");
 
             consumer.Close();
+            consumer.Dispose();
         }
     }
 }

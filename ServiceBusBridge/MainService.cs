@@ -8,9 +8,9 @@ namespace KafkaBridge;
 
 public class MainService : IHostedService
 {
-    private IEnumerable<IBackingService> BackingServices;
-    private IEnumerable<KafkaConsumerServiceConfig> KafkaConsumerServiceConfigs;
-    private IEnumerable<AzureServiceBusConsumerServiceConfig> AzureServiceBusConsumerServiceConfigs;
+    private readonly IEnumerable<IBackingService> BackingServices;
+    private readonly IEnumerable<KafkaConsumerServiceConfig> KafkaConsumerServiceConfigs;
+    private readonly IEnumerable<AzureServiceBusConsumerServiceConfig> AzureServiceBusConsumerServiceConfigs;
 
 
     private List<Task> KafkaConsumerTasks = new();
@@ -18,13 +18,13 @@ public class MainService : IHostedService
     
     public MainService(
         IEnumerable<IBackingService> backingServices,
-        IOptions<KafkaConsumerServiceConfigs> kconfigs,
-        IOptions<AzureServiceBusConsumerServiceConfigs> aconfigs
+        IOptions<KafkaConsumerServiceConfigs> kafkaConsumerConfigs,
+        IOptions<AzureServiceBusConsumerServiceConfigs> azureServiceBusConsumerConfigs
         )
     {
         BackingServices = backingServices;
-        KafkaConsumerServiceConfigs = kconfigs.Value.Configs;
-        AzureServiceBusConsumerServiceConfigs = aconfigs.Value.Configs;
+        KafkaConsumerServiceConfigs = kafkaConsumerConfigs.Value.Configs;
+        AzureServiceBusConsumerServiceConfigs = azureServiceBusConsumerConfigs.Value.Configs;
 
     }
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -44,7 +44,7 @@ public class MainService : IHostedService
         {
             var backingService = BackingServices.First(x => x.Name == config.BackingServiceName);
             var consumer = new KafkaConsumerService(config, backingService);
-            KafkaConsumerTasks.Add(Task.Run(() => consumer.StartConsumer(cancellationToken)));
+            KafkaConsumerTasks.Add(Task.Run(() => consumer.StartConsumer(cancellationToken), cancellationToken));
         }
     }
     
@@ -53,8 +53,8 @@ public class MainService : IHostedService
         foreach (var config in AzureServiceBusConsumerServiceConfigs)
         {
             var backingService = BackingServices.First(x => x.Name == config.BackingServiceName);
-            var consumer = new AzureServiceBusConsumerService();
-            AzureServiceBusConsumerTasks.Add(Task.Run(() => consumer.StartConsumer(cancellationToken)));
+            var consumer = new AzureServiceBusConsumerService(config, backingService);
+            AzureServiceBusConsumerTasks.Add(Task.Run(() => consumer.StartConsumer(cancellationToken), cancellationToken));
         }
     }
 }

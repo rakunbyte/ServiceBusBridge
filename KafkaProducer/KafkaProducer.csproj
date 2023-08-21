@@ -7,6 +7,14 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <NoWarn>1701;1702;1998</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <NoWarn>1701;1702;1998</NoWarn>
+    </PropertyGroup>
+
     <ItemGroup>
       <PackageReference Include="Confluent.Kafka" Version="2.2.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
