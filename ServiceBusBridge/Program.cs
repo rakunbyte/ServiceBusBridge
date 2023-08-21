@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 
-//TODO use host pattern so we can return health checks instead
+//TODO use host pattern instead so that we can have health check api endpoints
 
 Console.WriteLine("Starting Service Bus Consumer Host!");
 
