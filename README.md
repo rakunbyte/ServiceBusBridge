@@ -23,3 +23,8 @@ an abstract `PassthroughBackingService` to hide this logic.
 * Register the BackingService in the DI
 * Add a new ConsumerConfig that points to that BackingService
 * Start!
+
+# To Test
+* Have a Kafka installed to localhost:29092 or update the `KafkaProducer` to use your Kafka.
+* In the Testing solution folder there is a `KafkaProducer`.  Run that to produce messages
+* Wait and run the ServiceBusBridge
