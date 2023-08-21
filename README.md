@@ -1,0 +1,3 @@
+# ServiceBusBridge
+
+read manifesto.md
