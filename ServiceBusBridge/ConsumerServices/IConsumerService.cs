@@ -1,6 +1,6 @@
-namespace KafkaBridge.Consumers;
+namespace KafkaBridge.ConsumerServices;
 
 public interface IConsumerService
 {
-    Task StartConsumer();
+    Task StartConsumer(CancellationToken cancellationToken);
 }

@@ -3,6 +3,11 @@ using Confluent.Kafka;
 
 namespace KafkaBridge.Configuration;
 
+public class KafkaConsumerServiceConfigs
+{
+    public IEnumerable<KafkaConsumerServiceConfig> Configs { get; set; } = new List<KafkaConsumerServiceConfig>();
+}
+
 public class KafkaConsumerServiceConfig : IConsumerServiceConfig
 {
     public string? BackingServiceName { get; set; }

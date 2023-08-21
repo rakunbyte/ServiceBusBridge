@@ -1,6 +1,6 @@
 using Serilog;
 
-namespace KafkaBridge.Consumers;
+namespace KafkaBridge.ConsumerServices;
 
 public interface IAzureServiceBusConsumerService : IConsumerService
 {
@@ -8,7 +8,7 @@ public interface IAzureServiceBusConsumerService : IConsumerService
 
 public class AzureServiceBusConsumerService : IAzureServiceBusConsumerService
 {
-    public Task StartConsumer()
+    public Task StartConsumer(CancellationToken cancellationToken)
     {
         Log.Information("Azure Service Bus consuming");
         return Task.CompletedTask;

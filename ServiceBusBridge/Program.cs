@@ -1,19 +1,14 @@
-﻿using BackingServices.Common;
-using Destructurama;
+﻿using Destructurama;
 using KafkaBridge;
 using KafkaBridge.Configuration;
-using KafkaBridge.Consumers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Serilog;
-
-
-//TODO use host pattern instead so that we can have health check api endpoints
-
-Console.WriteLine("Starting Service Bus Consumer Host!");
 
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", EnvironmentVariableTarget.Process);
 
+//TODO probably better way of injecting config and logger
 var configurationBuilder = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -28,19 +23,22 @@ Log.Logger = new LoggerConfiguration()
     .Destructure.ToMaximumDepth(20)
     .CreateLogger();
 
-var serviceCollection = new ServiceCollection();
-serviceCollection.AddLogging(builder =>
-{
-    builder.AddSerilog(Log.Logger, true);
-});
-serviceCollection.AddBackingServices();
-serviceCollection.AddScoped<MainService>();
+var host = CreateHostBuilder(args).Build();
+await host.RunAsync();
 
-var kafkaConsumerServiceConfigs = configuration.GetSection("KafkaConsumerConfigs").Get<List<KafkaConsumerServiceConfig>>()?? new List<KafkaConsumerServiceConfig>();;
-var azureServiceBusConsumerServiceConfigs = configuration.GetSection("AzureServiceBusConsumerConfigs").Get<List<AzureServiceBusConsumerServiceConfig>>() ?? new List<AzureServiceBusConsumerServiceConfig>();
-
-var serviceProvider = serviceCollection.BuildServiceProvider();
-var mainService = serviceProvider.GetService<MainService>();
-
-await mainService.Start(kafkaConsumerServiceConfigs, azureServiceBusConsumerServiceConfigs);
-Console.ReadKey();
+static IHostBuilder CreateHostBuilder(string[] args) =>
+    Host.CreateDefaultBuilder(args)
+        .ConfigureLogging((context, builder) =>
+        {
+            builder.AddSerilog(Log.Logger, true);
+        })
+        .ConfigureServices((builder, serviceCollection) =>
+        {
+            //TODO hate wrapping this, figure out how to use arrays with IOptions
+            serviceCollection.Configure<KafkaConsumerServiceConfigs>(builder.Configuration.GetSection("KafkaConsumerConfigs"));
+            serviceCollection.Configure<AzureServiceBusConsumerServiceConfigs>(builder.Configuration.GetSection("AzureServiceBusConsumerConfigs"));
+            
+            serviceCollection.AddBackingServices();
+            serviceCollection.AddHostedService<MainService>();
+        })
+        .UseSerilog();

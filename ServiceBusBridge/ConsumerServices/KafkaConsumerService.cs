@@ -3,14 +3,14 @@ using Confluent.Kafka;
 using KafkaBridge.Configuration;
 using Serilog;
 
-namespace KafkaBridge.Consumers;
+namespace KafkaBridge.ConsumerServices;
 
 public interface IKafkaConsumerService : IConsumerService
 {
     
 }
 
-public class KafkaConsumerService : IConsumerService
+public class KafkaConsumerService : IKafkaConsumerService
 {
     private readonly KafkaConsumerServiceConfig _kafkaConsumerServiceConfig;
     private readonly IBackingService BackingService;
@@ -21,7 +21,7 @@ public class KafkaConsumerService : IConsumerService
         BackingService = backingService;
     }
     
-    public async Task StartConsumer()
+    public async Task StartConsumer(CancellationToken cancellationToken)
     {
         Log.Information("Starting KafkaConsumerService for {@KafkaConsumerServiceConfig}", _kafkaConsumerServiceConfig);
         var consumerConfig = _kafkaConsumerServiceConfig.CreateConsumerConfig();
@@ -32,7 +32,7 @@ public class KafkaConsumerService : IConsumerService
         {
             while (true)
             {
-                var consumeResult = consumer.Consume();
+                var consumeResult = consumer.Consume(cancellationToken);
                 Log.Information("Message received, sending to backing service");
                 await BackingService.ProcessMessage(consumeResult.Message.Value);
             }
