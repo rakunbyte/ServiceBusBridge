@@ -9,12 +9,12 @@ public abstract class BaseBackingService<T> : IBackingService
     
     public async Task ProcessMessage(string message)
     {
-        Log.Information("AccountCreatedService start processing message");
+        Log.Information("{Service} start processing message", GetType());
         var workingEvent = DeserializeMessage(message);
         await HandleEvent(workingEvent);
     }
 
-    private T DeserializeMessage(string message)
+    private static T DeserializeMessage(string message)
     {
         if (message == null) throw new ArgumentException();
 
@@ -22,7 +22,5 @@ public abstract class BaseBackingService<T> : IBackingService
         return result ?? throw new ArgumentException($"Json Deserialized as null for {message} for BackingService");
     }
 
-    public abstract Task HandleEvent(T workingEvent);
-
-
+    protected abstract Task HandleEvent(T workingEvent);
 }
