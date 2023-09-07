@@ -1,6 +1,8 @@
-﻿using Destructurama;
+﻿using BackingServices.Common;
+using Destructurama;
 using KafkaBridge;
 using KafkaBridge.Configuration;
+using KafkaBridge.ConsumerServices;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -34,11 +36,29 @@ static IHostBuilder CreateHostBuilder(string[] args) =>
         })
         .ConfigureServices((builder, serviceCollection) =>
         {
-            //TODO hate wrapping this, figure out how to use arrays with IOptions
-            serviceCollection.Configure<KafkaConsumerServiceConfigs>(builder.Configuration.GetSection("KafkaConsumerConfigs"));
-            serviceCollection.Configure<AzureServiceBusConsumerServiceConfigs>(builder.Configuration.GetSection("AzureServiceBusConsumerConfigs"));
-            
             serviceCollection.AddBackingServices();
+
+            var provider = serviceCollection.BuildServiceProvider();
+            var backingServices = provider.GetServices<IBackingService>().ToList();
+            
+            //TODO hate wrapping this, figure out arrays
+            var kafkaConsumerConfigs = builder.Configuration.GetSection("KafkaConsumerConfigs").Get<KafkaConsumerServiceConfigs>();
+            if(kafkaConsumerConfigs != null)
+                foreach (var config in kafkaConsumerConfigs.Configs)
+                {
+                    var backingService = backingServices.First(x => x.Name == config.BackingServiceName);
+                    serviceCollection.AddSingleton<IKafkaConsumerService>(x => new KafkaConsumerService(config, backingService));
+                }
+            
+            //TODO hate wrapping this, figure out arrays
+            var azureConsumerConfigs = builder.Configuration.GetSection("AzureServiceBusConsumerServiceConfigs").Get<AzureServiceBusConsumerServiceConfigs>();
+            if(azureConsumerConfigs != null)
+                foreach (var config in azureConsumerConfigs.Configs)
+                {
+                    var backingService = backingServices.First(x => x.Name == config.BackingServiceName);
+                    serviceCollection.AddSingleton<IAzureServiceBusConsumerService>(x => new AzureServiceBusConsumerService(config, backingService));
+                }
+            
             serviceCollection.AddHostedService<MainService>();
         })
         .UseSerilog();

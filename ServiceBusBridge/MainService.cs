@@ -1,6 +1,8 @@
+using System.Collections;
 using BackingServices.Common;
 using KafkaBridge.Configuration;
 using KafkaBridge.ConsumerServices;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
@@ -8,25 +10,21 @@ namespace KafkaBridge;
 
 public class MainService : IHostedService
 {
-    private readonly IEnumerable<IBackingService> BackingServices;
-    private readonly IEnumerable<KafkaConsumerServiceConfig> KafkaConsumerServiceConfigs;
-    private readonly IEnumerable<AzureServiceBusConsumerServiceConfig> AzureServiceBusConsumerServiceConfigs;
+    private readonly IEnumerable<IKafkaConsumerService> KafkaConsumerServices;
+    private readonly IEnumerable<IAzureServiceBusConsumerService> AzureServiceBusConsumerServices;
 
 
     private List<Task> KafkaConsumerTasks = new();
     private List<Task> AzureServiceBusConsumerTasks = new();
     
     public MainService(
-        IEnumerable<IBackingService> backingServices,
-        IOptions<KafkaConsumerServiceConfigs> kafkaConsumerConfigs,
-        IOptions<AzureServiceBusConsumerServiceConfigs> azureServiceBusConsumerConfigs
-        )
+        IEnumerable<IKafkaConsumerService> kafkaConsumerServices,
+        IEnumerable<IAzureServiceBusConsumerService> azureServiceBusConsumerServices)
     {
-        BackingServices = backingServices;
-        KafkaConsumerServiceConfigs = kafkaConsumerConfigs.Value.Configs;
-        AzureServiceBusConsumerServiceConfigs = azureServiceBusConsumerConfigs.Value.Configs;
-
+        KafkaConsumerServices = kafkaConsumerServices;
+        AzureServiceBusConsumerServices = azureServiceBusConsumerServices;
     }
+    
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await StartKafkaConsumers(cancellationToken);
@@ -40,20 +38,16 @@ public class MainService : IHostedService
     
     private async Task StartKafkaConsumers(CancellationToken cancellationToken)
     {
-        foreach (var config in KafkaConsumerServiceConfigs)
+        foreach (var consumer in KafkaConsumerServices)
         {
-            var backingService = BackingServices.First(x => x.Name == config.BackingServiceName);
-            var consumer = new KafkaConsumerService(config, backingService);
             KafkaConsumerTasks.Add(Task.Run(() => consumer.StartConsumer(cancellationToken), cancellationToken));
         }
     }
     
     private async Task StartAzureServiceBusConsumers(CancellationToken cancellationToken)
     {
-        foreach (var config in AzureServiceBusConsumerServiceConfigs)
+        foreach (var consumer in AzureServiceBusConsumerServices)
         {
-            var backingService = BackingServices.First(x => x.Name == config.BackingServiceName);
-            var consumer = new AzureServiceBusConsumerService(config, backingService);
             AzureServiceBusConsumerTasks.Add(Task.Run(() => consumer.StartConsumer(cancellationToken), cancellationToken));
         }
     }

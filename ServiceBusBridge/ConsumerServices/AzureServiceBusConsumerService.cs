@@ -44,6 +44,5 @@ public class AzureServiceBusConsumerService : IAzureServiceBusConsumerService
 
             await client.DisposeAsync();
         }
-        
     }
 }
