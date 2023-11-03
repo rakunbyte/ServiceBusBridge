@@ -4,7 +4,7 @@ using EventModels;
 using Newtonsoft.Json;
 
 var config = new ProducerConfig {
-    BootstrapServers = "localhost:29092",
+    BootstrapServers = "localhost:9092",
     SecurityProtocol = SecurityProtocol.Plaintext,
 };
 
